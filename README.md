@@ -1,166 +1,448 @@
-# 맛집 찾기 AI Agent (ReAct + Agentic Design Patterns)
+# 맛집 찾기 AI Agent
 
-단순히 LLM에게 "맛집 추천해줘"라고 묻는 것이 아니라, Agent가 스스로
-**요청 분석 → 계획 수립 → 도구 호출 → Observation 수신 → 결과 검토/개선 → 최종 추천**
-하는 구조로 구현했습니다. 과제 핵심인 *"Agent가 어떻게 생각하고 도구를 사용하며 결과를
-개선하는지"* 가 실행 Trace에 그대로 드러납니다.
+### ReAct + Agentic Design Patterns 기반 맛집 추천 에이전트
+
+단순히 LLM에게 `"맛집 추천해줘"`라고 묻는 것이 아니라,
+Agent가 사용자의 요청을 분석하고, 계획을 세우고, 필요한 도구를 호출한 뒤 Observation을 바탕으로 최종 추천을 생성하는 구조로 구현했습니다.
+
+이번 과제의 핵심인 **“Agent가 어떤 방식으로 생각하고, 도구를 사용하며, 결과를 개선하는지”**가 실행 Trace에 드러나도록 구성했습니다.
 
 ---
 
-## 1. 실행 방법
+## 1. 프로젝트 개요
+
+이 프로젝트는 사용자의 조건에 맞는 맛집을 추천하는 AI Agent입니다.
+
+사용자 요청 예시:
+
+> 전주 객사 근처에서 친구랑 저녁 먹기 좋은 맛집을 찾아줘.
+> 너무 비싸지 않고, 리뷰가 좋은 곳 위주로 3곳 추천해줘.
+
+Agent는 위 요청을 다음과 같이 처리합니다.
+
+1. 사용자 요청 분석
+2. 지역, 음식 종류, 가격대, 방문 목적 파악
+3. 필요한 도구 선택
+4. 맛집 검색 도구 호출
+5. Observation 수신
+6. 거리, 평점, 리뷰 수, 가격대 기준 필터링
+7. 조건이 부족하거나 결과가 부족한 경우 Reflection 수행
+8. 최종 맛집 추천 결과 생성
+
+---
+
+## 2. 실행 방법
 
 ### 필요 환경
-- Python 3.9 이상
-- 추가 패키지 없이도 실행됩니다(표준 라이브러리만 사용). 외부 API를 켜려면 아래 패키지 설치.
+
+```bash
+Python 3.9 이상
+```
+
+기본 실행은 표준 라이브러리만 사용하기 때문에 추가 패키지 없이도 실행 가능합니다.
+외부 API 또는 LLM 기능을 사용하려면 `requirements.txt`를 설치하면 됩니다.
+
+---
 
 ### 빠른 실행
+
+#### 1) 과제 필수 시나리오와 예외 처리 시나리오 실행
+
 ```bash
-# 1) 과제 필수 시나리오 + 예외/Memory 시나리오 한 번에 실행 (Trace 출력)
 python run_demo.py
+```
 
-# 2) 단일 질문 실행
+#### 2) 단일 질문 실행
+
+```bash
 python -m src.main "전주 객사 근처에서 친구랑 저녁 먹기 좋은 맛집 3곳 추천해줘"
-python -m src.main "부산 해운대 근처에서 친구랑 저녁 회 3곳 추천해줘"   # 전국 검색(카카오 키 필요)
+```
 
-# 3) 대화형 모드 (Memory 패턴 확인 — 같은 세션에서 여러 번 질문)
+```bash
+python -m src.main "부산 해운대 근처에서 친구랑 저녁 회 3곳 추천해줘"
+```
+
+> 부산 등 샘플 데이터에 없는 지역은 `KAKAO_API_KEY`가 있을 때 전국 검색이 가능합니다.
+
+#### 3) 대화형 모드 실행
+
+```bash
 python -m src.main
 ```
 
-### 외부 API / LLM 켜기 (선택)
-키가 없으면 자동으로 **오프라인 모드(샘플 데이터 + 규칙기반 추론)** 로 동작합니다.
-키를 넣으면 실제 LLM/지도 API로 업그레이드됩니다.
+대화형 모드에서는 같은 세션 안에서 사용자의 선호 조건을 기억하는 **Memory Pattern**을 확인할 수 있습니다.
+
+---
+
+## 3. 실행 모드
+
+API Key가 없으면 자동으로 오프라인 모드로 실행됩니다.
+API Key를 설정하면 실제 LLM 또는 카카오 로컬 API를 사용할 수 있습니다.
+
+| 조건                  | 실행 모드           | 설명                      |
+| ------------------- | --------------- | ----------------------- |
+| `OPENAI_API_KEY` 있음 | LLM 주도 ReAct 모드 | LLM이 매 턴 직접 도구를 선택하며 추론 |
+| API Key 없음          | 규칙기반 ReAct 모드   | 샘플 데이터와 규칙 기반 로직으로 실행   |
+
+환경변수로 실행 모드를 강제할 수도 있습니다.
+
+```bash
+AGENT_MODE=llm
+```
+
+```bash
+AGENT_MODE=rule
+```
+
+---
+
+## 4. 외부 API / LLM 사용 방법
+
+외부 API는 선택 사항입니다.
+키가 없으면 자동으로 샘플 데이터 기반 오프라인 모드로 동작합니다.
+
+### 패키지 설치
+
 ```bash
 pip install -r requirements.txt
 ```
-OPENAI_API_KEY=...      # (선택) LLM 주도 ReAct 모드
-KAKAO_API_KEY=...       # (선택) 전국 실제 맛집 검색
+
+### 환경변수 설정
+
+프로젝트 루트에 `.env` 파일을 만들고 아래와 같이 작성합니다.
+
+```env
+OPENAI_API_KEY=your_openai_api_key
+KAKAO_API_KEY=your_kakao_rest_api_key
 ```
-### 실행 모드 (자동 선택)
-| 조건 | 모드 | 설명 |
-|------|------|------|
-| `OPENAI_API_KEY` 있음 | **LLM 주도 ReAct** | LLM이 매 턴 **직접 도구를 선택**하며 추론 (`src/llm_react.py`) |
-| 키 없음(기본) | **규칙기반 ReAct** | 키 없이 바로 실행, 동일한 Trace 구조 (`src/agent.py`) |
 
-`AGENT_MODE=llm` / `AGENT_MODE=rule` 환경변수로 강제할 수 있습니다.
-
-### 검색 지역 범위
-| 조건 | 범위 |
-|------|------|
-| `KAKAO_API_KEY` 있음 | **전국** — 모르는 지역도 카카오 좌표 검색으로 자동 처리 |
-| 키 없음(기본) | 샘플 데이터에 든 지역(**전주·서울**)만 |
+> `.env` 파일에는 개인 API Key가 들어가므로 GitHub에 업로드하지 않습니다.
 
 ---
 
-## 2. 폴더 구조
-```
-matjip_agent/
-├── README.md                ← 본 문서
-├── requirements.txt         ← 실행 환경(선택 패키지 표시)
-├── .env                     ← API Key 입력 파일 (키만 넣어 사용; 실제 키 넣으면 제출 제외)
-├── .gitignore               ← .env, __pycache__ 등 제외 규칙
-├── run_demo.py              ← 과제 제출용 데모 (필수 프롬프트 + 예외 5종)
-├── trace_example.txt        ← run_demo.py 실행 로그(Trace) 
+## 5. 검색 지역 범위
+
+| 조건                 | 검색 범위                 |
+| ------------------ | --------------------- |
+| `KAKAO_API_KEY` 있음 | 전국 검색 가능              |
+| API Key 없음         | 샘플 데이터에 포함된 지역만 검색 가능 |
+
+기본 샘플 데이터는 다음 지역을 중심으로 구성했습니다.
+
+* 전주 객사
+* 서울 홍대
+
+---
+
+## 6. 폴더 구조
+
+```text
+restaurant-ai-agent/
 ├── data/
-│   └── restaurants.json     ← 직접 만든 샘플 맛집 데이터셋(전주 객사·서울 홍대)
-└── src/
-    ├── __init__.py          ← 패키지 초기화 (.env 자동 로드 + 출력 UTF-8 설정)
-    ├── agent.py             ← 규칙기반 ReAct 루프 (패턴 5종 오케스트레이션)
-    ├── llm_react.py         ← LLM 주도 ReAct 루프 (LLM이 도구를 직접 선택)
-    ├── tools.py             ← 6개 도구(검색/거리/평점/가격/랭킹/지역검증) + 카카오 연동
-    ├── memory.py            ← Memory 패턴 + 자연어 요청 파서(지역/음식/가격/목적 추출)
-    ├── trace.py             ← 단계별 판단 과정 로거
-    ├── llm.py               ← (규칙기반 모드용) OpenAI로 Thought/답변 문구 보강
-    └── main.py              ← CLI 진입점 (모드 자동 선택)
+│   └── restaurants.json          # 직접 만든 샘플 맛집 데이터셋
+│
+├── src/
+│   ├── __init__.py               # 패키지 초기화
+│   ├── agent.py                  # 규칙기반 ReAct Agent 실행 루프
+│   ├── llm_react.py              # LLM 주도 ReAct Agent 실행 루프
+│   ├── llm.py                    # LLM 호출 관련 보조 모듈
+│   ├── main.py                   # CLI 실행 진입점
+│   ├── memory.py                 # Memory Pattern 및 사용자 조건 파싱
+│   ├── tools.py                  # 맛집 검색, 필터링, 랭킹 도구
+│   └── trace.py                  # 단계별 Trace 로그 관리
+│
+├── .gitignore                    # .env, __pycache__ 등 제외 규칙
+├── README.md                     # 프로젝트 설명 문서
+├── requirements.txt              # 실행 환경 및 선택 패키지
+├── run_demo.py                   # 과제 제출용 실행 데모
+└── trace_example.txt             # ReAct Agent 도구 호출 Trace 예시
+```
+
+> `__pycache__`, `.env`, `.venv` 등은 제출 및 GitHub 업로드 대상에서 제외합니다.
+
+---
+
+## 7. 맛집 검색 도구
+
+`src/tools.py`에 맛집 추천을 위한 도구를 구현했습니다.
+
+모든 도구는 다음과 같은 표준 Observation 형식으로 결과를 반환합니다.
+
+```python
+{
+    "ok": True,
+    "data": [],
+    "error": None,
+    "tool": "tool_name",
+    "meta": {}
+}
+```
+
+오류가 발생하더라도 프로그램이 바로 종료되지 않고, `ok=False` 형태의 Observation을 반환하여 Agent가 대안을 선택할 수 있도록 했습니다.
+
+| 도구 이름                | 역할                                   |
+| -------------------- | ------------------------------------ |
+| `validate_region`    | 지역 또는 랜드마크 존재 여부 검증                  |
+| `search_restaurants` | 지역, 음식 종류, 영업 조건 기반 맛집 후보 검색         |
+| `filter_by_distance` | 기준 좌표를 중심으로 거리 필터링                   |
+| `filter_by_rating`   | 평점과 리뷰 수 기준 필터링                      |
+| `filter_by_price`    | 가격대 기준 필터링                           |
+| `rank_restaurants`   | 평점, 리뷰 수, 거리, 방문 목적 등을 기준으로 최종 순위 계산 |
+
+---
+
+## 8. 데이터 소스
+
+### 1) 기본 모드: 샘플 데이터셋
+
+외부 API Key가 없을 경우 `data/restaurants.json` 파일에 저장된 샘플 데이터를 사용합니다.
+
+샘플 데이터에는 다음 정보가 포함됩니다.
+
+* 식당 이름
+* 지역
+* 랜드마크
+* 음식 종류
+* 평점
+* 리뷰 수
+* 가격대
+* 좌표
+* 방문 목적
+* 대표 메뉴
+
+### 2) 선택 모드: Kakao Local API
+
+`KAKAO_API_KEY`가 설정되어 있으면 카카오 로컬 API를 사용해 실제 지역 기반 검색을 수행합니다.
+
+사용 API:
+
+```text
+GET /v2/local/search/keyword.json
+```
+
+사용 방식:
+
+* 지역 검증
+* 기준 좌표 탐색
+* 음식점 또는 카페 검색
+* 거리 기준 정렬
+* 검색 실패 시 샘플 데이터로 폴백
+
+주의 사항:
+
+> 카카오 로컬 API는 평점과 리뷰 수를 제공하지 않습니다.
+> 따라서 카카오 API 모드에서는 평점 필터가 제한적으로 동작하며, 거리와 검색 관련도를 중심으로 추천합니다.
+
+---
+
+## 9. 적용한 Agentic Design Pattern
+
+과제 요구사항인 ReAct Pattern을 필수로 포함하고, 총 5가지 Agentic Design Pattern을 적용했습니다.
+
+### 1) ReAct Pattern
+
+Agent가 Thought, Action, Observation 흐름을 반복하며 최종 답변을 생성합니다.
+
+```text
+Thought → Action → Observation → Thought → Action → Observation → Final Answer
+```
+
+구현 파일:
+
+```text
+src/agent.py
+src/llm_react.py
 ```
 
 ---
 
-## 3. 맛집 검색 도구 (Tool Use)
+### 2) Tool Use Pattern
 
-`src/tools.py` 의 도구 6종. 모든 도구는 `{"ok","data","error","tool","meta"}` 형태의 **표준
-Observation** 을 반환하며, 오류가 나도 예외를 던지지 않고 `ok=False` Observation 을 돌려준다.
+Agent가 상황에 따라 필요한 도구를 직접 선택하고 호출합니다.
 
-| 도구 | 역할 |
-|------|------|
-| `validate_region` | 지역/랜드마크 존재 검증 + 기준 좌표 확보 (카카오 키 있으면 전국 지오코딩) |
-| `search_restaurants` | 지역·음식종류·저녁영업으로 후보 검색 (카카오 키 있으면 실제 검색) |
-| `filter_by_distance` | 기준 좌표 반경(km) 필터 (Haversine 거리 계산) |
-| `filter_by_rating` | 평점/리뷰 수 필터 |
-| `filter_by_price` | 가격대(price_level 1~4) 필터 |
-| `rank_restaurants` | 평점·리뷰·거리·방문목적 가중 점수화 후 상위 K개 |
+사용 도구 예시:
 
-### 데이터 소스
-- **기본(키 없음): 직접 만든 샘플 데이터셋**(`data/restaurants.json`, 전주 객사·서울 홍대 중심).
-  필드: 이름, 지역, 랜드마크, 음식종류, 평점, 리뷰수, 가격대, 좌표, 방문목적, 대표메뉴 등.
-  오프라인이라 데이터에 든 지역만 검색됩니다.
-- **(권장) 카카오 로컬 API → 전국 검색**: `KAKAO_API_KEY` 설정 시 전국 어디든 동작.
-  마트·편의점 등 비식당은 결과에서 자동 제외하여 추천 품질을 높입니다.
-
-> **추천 품질 규칙**
-> - 요청에 **식사 키워드(저녁/점심/아침/밥/식사 등)** 가 있으면 카페·디저트 업종을 제외합니다
->   (밥 먹는 자리에 베이커리·카페가 추천되지 않도록). 단, 사용자가 "카페"·"디저트"를
->   직접 요청하면 그대로 보여줍니다. 식사 키워드 없는 일반 "맛집 추천"에는 디저트도 포함됩니다.
-> - "술 한잔 / 한잔 / 이자카야" 등은 **주점**으로 인식해 '술집'으로 검색합니다.
+```text
+validate_region
+search_restaurants
+filter_by_distance
+filter_by_rating
+filter_by_price
+rank_restaurants
+```
 
 ---
 
-## 4. 외부 API 사용 방법 (선택)
+### 3) Plan-and-Solve Pattern
 
-### Kakao Local API (실제 맛집 데이터 / 전국)
-공식 문서: https://developers.kakao.com/docs/ko/local/dev-guide
+사용자 요청을 한 번에 처리하지 않고 다음 단계로 나누어 해결합니다.
 
-1. https://developers.kakao.com → [내 애플리케이션] → 앱 생성
-2. [앱] → **[플랫폼 키]** 에서 **REST API 키** 복사
-3. **[카카오맵] → [사용 설정] → 상태 ON** (2024.12 이후 신규 앱은 필수)
-4. `.env` 에 `KAKAO_API_KEY=복사한_REST_API_키` 입력 후 실행
-
-동작:
-- 지역 검증: `validate_region` 이 카카오 '키워드 장소 검색'으로 좌표를 찾음(전국).
-- 맛집 검색: `GET /v2/local/search/keyword.json`, 헤더 `Authorization: KakaoAK {키}`,
-  파라미터 `query`(예: "회 맛집"), `category_group_code`(음식점 FD6/카페 CE7),
-  좌표 기준 `x,y,radius,sort=distance`, `size=15`. 응답의 `distance`·`place_url` 활용.
-- 호출 실패 시 Observation에 실패 기록 후 **샘플 데이터로 자동 폴백** (예외 처리에 해당).
-
-> ⚠️ 카카오는 **평점·리뷰를 제공하지 않습니다.** 따라서 카카오 모드에서는 `filter_by_rating`
-> 이 자연스럽게 무시되고(평점 없는 항목 통과), 추천은 **거리·관련도 순**으로 이뤄집니다.
-> 평점 기반 정밀 추천을 보려면 샘플 데이터셋 모드를 사용하세요.
-> (도구의 능력에 맞춰 에이전트가 동작을 바꾸는 사례이기도 합니다.)
-
-### OpenAI API (LLM 추론)
-1. `.env` 에 `OPENAI_API_KEY=...` 입력 (모델은 `OPENAI_MODEL`, 기본 `gpt-4o-mini`)
-2. `LLM 주도 ReAct` 모드로 전환되어, LLM이 매 턴 다음 도구를 JSON으로 직접 선택합니다.
+```text
+지역 분석
+→ 음식 종류 파악
+→ 후보 검색
+→ 거리 필터링
+→ 평점/리뷰 수 필터링
+→ 가격대 필터링
+→ 최종 랭킹 생성
+```
 
 ---
 
-## 5. 적용한 Agentic Design Pattern (5종)
-과제 요구: 최소 2개 이상, ReAct 필수 → **5개 적용**.
+### 4) Reflection Pattern
 
-1. **ReAct** — `Thought → Action → Observation` 반복으로 도구를 호출하고 결과를 보고
-   다음 행동을 결정. 규칙기반(`agent.py`)·LLM 주도(`llm_react.py`) 두 구현 제공.
-2. **Tool Use** — 6개 도구를 상황에 맞게 직접 선택·호출.
-3. **Plan-and-Solve** — 요청을 (지역검증→검색→거리→평점→가격→랭킹) 단계로 분해해 계획 수립.
-4. **Reflection** — 결과가 0건이거나 요청 개수보다 적으면 스스로 검토하고
-   음식종류/가격/평점 조건을 완화해 재검토.
-5. **Memory** — 지역·랜드마크·음식종류·가격대·방문목적 선호를 세션 동안 기억하고
-   다음 요청의 부족한 조건을 자동 보완.
+검색 결과가 부족하거나 사용자의 조건을 만족하지 못하는 경우, Agent가 스스로 조건을 검토하고 완화합니다.
 
----
+예시:
 
-## 6. 예외 처리 (모두 Observation 기반 대안 제시)
-
-| 상황 | 처리 |
-|------|------|
-| 존재하지 않는 지역 | `validate_region` ok=false → (카카오로도 못 찾으면) 정확한 지명 재입력 안내 |
-| 검색 결과 없음 | 음식종류→저녁영업 조건 완화 후 재검색 (Reflection) |
-| 음식 종류가 모호함 | "맛있는 거" 등 → 전체 종류로 검색 후 점수순 추천 |
-| API 호출 실패 | Observation에 실패 기록 후 샘플 데이터로 폴백 |
-| 사용자 조건 부족 | Memory로 보완, 그래도 지역이 없으면 되물음 |
+* 결과가 0개인 경우 음식 종류 조건 완화
+* 후보가 부족한 경우 가격 조건 완화
+* 평점 조건이 너무 엄격한 경우 리뷰 기준 완화
+* API 호출 실패 시 샘플 데이터셋으로 대체
 
 ---
 
-## 7. 실행 테스트 시나리오 (필수 프롬프트)
-> "전주 객사 근처에서 친구랑 저녁 먹기 좋은 맛집을 찾아줘. 너무 비싸지 않고, 리뷰가 좋은 곳 위주로 3곳 추천해줘."
+### 5) Memory Pattern
 
-도구 호출 순서(요약): `validate_region` → `search_restaurants` → `filter_by_distance`
-→ `filter_by_rating` → `filter_by_price` → `rank_restaurants`.
-단계별 전체 Trace 는 `trace_example.txt` 참고.
+대화형 모드에서 사용자의 선호 조건을 기억하고 다음 추천에 반영합니다.
+
+기억하는 정보 예시:
+
+* 선호 지역
+* 음식 종류
+* 가격대
+* 방문 목적
+* 함께 가는 사람
+
+---
+
+## 10. 예외 처리
+
+아래 상황에 대해 단순 오류 출력이 아니라, Agent가 Observation을 바탕으로 대안을 제시하도록 구현했습니다.
+
+| 예외 상황         | 처리 방식                                             |
+| ------------- | ------------------------------------------------- |
+| 존재하지 않는 지역 입력 | `validate_region`에서 `ok=False` 반환 후 정확한 지역 재입력 안내 |
+| 검색 결과 없음      | 조건을 완화하고 재검색                                      |
+| 음식 종류가 모호함    | 전체 음식 종류 대상으로 검색 후 점수순 추천                         |
+| API 호출 실패     | 실패 Observation 기록 후 샘플 데이터로 폴백                    |
+| 사용자 조건 부족     | Memory로 보완하거나 필요한 조건을 질문                          |
+
+---
+
+## 11. 실행 테스트 시나리오
+
+과제에서 제시된 필수 프롬프트를 실행했습니다.
+
+```text
+전주 객사 근처에서 친구랑 저녁 먹기 좋은 맛집을 찾아줘. 너무 비싸지 않고, 리뷰가 좋은 곳 위주로 3곳 추천해줘.
+```
+
+도구 호출 흐름은 다음과 같습니다.
+
+```text
+validate_region
+→ search_restaurants
+→ filter_by_distance
+→ filter_by_rating
+→ filter_by_price
+→ rank_restaurants
+→ Final Answer
+```
+
+실행 Trace는 `trace_example.txt` 파일에서 확인할 수 있습니다.
+
+---
+
+## 12. ReAct Agent Trace 예시
+
+Trace에는 다음 내용이 포함됩니다.
+
+* Agent의 판단 과정
+* 호출한 도구 이름
+* 도구 입력값
+* 도구 실행 결과
+* Observation
+* 최종 추천 결과
+
+예시 흐름:
+
+```text
+Thought: 사용자의 요청에서 지역은 전주 객사, 목적은 친구와 저녁 식사, 조건은 저렴한 가격과 좋은 리뷰로 파악했다.
+
+Action: validate_region
+Action Input: {"region": "전주", "landmark": "객사"}
+
+Observation: 지역 검증 성공. 전주 객사 기준 좌표를 확보했다.
+
+Thought: 지역이 확인되었으므로 근처 맛집 후보를 검색한다.
+
+Action: search_restaurants
+Action Input: {"region": "전주", "landmark": "객사", "meal_time": "dinner"}
+
+Observation: 조건에 맞는 맛집 후보를 찾았다.
+
+Thought: 친구와 저녁 식사에 적합하고 너무 비싸지 않은 곳을 골라야 한다.
+
+Action: filter_by_price
+Action Input: {"max_price_level": 2}
+
+Observation: 가격대가 높은 후보를 제외했다.
+
+Thought: 리뷰가 좋은 곳 위주로 최종 순위를 매긴다.
+
+Action: rank_restaurants
+Action Input: {"top_k": 3, "sort_by": ["rating", "review_count", "distance"]}
+
+Observation: 최종 추천 후보 3곳을 선정했다.
+
+Final Answer: 전주 객사 근처에서 친구와 저녁 먹기 좋은 맛집 3곳을 추천한다.
+```
+
+---
+
+## 13. 제출 항목
+
+본 Repository에는 다음 제출 항목이 포함되어 있습니다.
+
+```text
+소스 코드
+requirements.txt
+README.md
+실행 로그 또는 Trace 파일
+사용한 Agentic Design Pattern 설명
+ReAct Agent의 도구 호출 Trace
+```
+
+제외 항목:
+
+```text
+.env
+.venv/
+__pycache__/
+node_modules/
+API Key가 포함된 파일
+```
+
+---
+
+## 14. 실행 로그 파일
+
+과제 제출용 실행 로그는 아래 파일에 포함되어 있습니다.
+
+```text
+trace_example.txt
+```
+
+해당 파일에는 필수 테스트 프롬프트 실행 과정과 도구 호출 Trace가 기록되어 있습니다.
+
+---
+
+## 15. 프로젝트 특징 요약
+
+* ReAct Pattern 기반 맛집 추천 Agent 구현
+* Tool Use, Plan-and-Solve, Reflection, Memory Pattern 적용
+* 샘플 데이터 기반 오프라인 실행 가능
+* Kakao Local API를 통한 전국 검색 확장 가능
+* API 실패 및 조건 부족 상황에 대한 예외 처리 포함
+* 실행 Trace를 통해 Agent의 도구 호출 과정 확인 가능
