@@ -1,7 +1,5 @@
 # 맛집 찾기 AI Agent (ReAct + Agentic Design Patterns)
 
-13주차 실습 과제 — 사용자의 조건에 맞는 맛집을 찾아주는 **Agentic AI Agent**.
-
 단순히 LLM에게 "맛집 추천해줘"라고 묻는 것이 아니라, Agent가 스스로
 **요청 분석 → 계획 수립 → 도구 호출 → Observation 수신 → 결과 검토/개선 → 최종 추천**
 하는 구조로 구현했습니다. 과제 핵심인 *"Agent가 어떻게 생각하고 도구를 사용하며 결과를
@@ -34,15 +32,9 @@ python -m src.main
 ```bash
 pip install -r requirements.txt
 ```
-프로젝트에 이미 `.env` 파일이 들어 있습니다. **복사할 필요 없이 그 파일을 열어** 키만 넣고
-저장하면 됩니다(실행 시 자동으로 읽힘).
-```
 OPENAI_API_KEY=...      # (선택) LLM 주도 ReAct 모드
 KAKAO_API_KEY=...       # (선택) 전국 실제 맛집 검색
 ```
-> ⚠️ **실제 키를 넣은 뒤에는 제출물(zip)에서 `.env` 를 반드시 제외하세요.**
-> (`.gitignore` 에 등록돼 있어 git 에는 자동 제외됩니다.)
-
 ### 실행 모드 (자동 선택)
 | 조건 | 모드 | 설명 |
 |------|------|------|
@@ -143,7 +135,7 @@ Observation** 을 반환하며, 오류가 나도 예외를 던지지 않고 `ok=
 ## 5. 적용한 Agentic Design Pattern (5종)
 과제 요구: 최소 2개 이상, ReAct 필수 → **5개 적용**.
 
-1. **ReAct (필수)** — `Thought → Action → Observation` 반복으로 도구를 호출하고 결과를 보고
+1. **ReAct** — `Thought → Action → Observation` 반복으로 도구를 호출하고 결과를 보고
    다음 행동을 결정. 규칙기반(`agent.py`)·LLM 주도(`llm_react.py`) 두 구현 제공.
 2. **Tool Use** — 6개 도구를 상황에 맞게 직접 선택·호출.
 3. **Plan-and-Solve** — 요청을 (지역검증→검색→거리→평점→가격→랭킹) 단계로 분해해 계획 수립.
