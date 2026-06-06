@@ -1,0 +1,146 @@
+{
+  "regions": {
+    "전주": {
+      "aliases": ["전주", "전주시", "jeonju"],
+      "landmarks": {
+        "객사": {"aliases": ["객사", "객리단길", "전주객사", "풍남동 객사"], "lat": 35.8175, "lng": 127.1480},
+        "한옥마을": {"aliases": ["한옥마을", "전주한옥마을"], "lat": 35.8150, "lng": 127.1530},
+        "전북대": {"aliases": ["전북대", "전북대학교", "구정문"], "lat": 35.8460, "lng": 127.1300}
+      }
+    },
+    "서울": {
+      "aliases": ["서울", "서울시", "seoul"],
+      "landmarks": {
+        "홍대": {"aliases": ["홍대", "홍익대", "홍대입구", "합정"], "lat": 37.5563, "lng": 126.9236}
+      }
+    }
+  },
+  "restaurants": [
+    {
+      "id": "jj001", "name": "객사돌솥비빔밥", "region": "전주", "area": "객사",
+      "food_type": "한식", "rating": 4.6, "review_count": 1820, "price_level": 2,
+      "lat": 35.8178, "lng": 127.1483, "good_for": ["친구", "가족", "혼밥"],
+      "signature_menu": "전주식 돌솥비빔밥", "open_dinner": true,
+      "description": "전주 대표 비빔밥 노포. 객사 도보 1분."
+    },
+    {
+      "id": "jj002", "name": "풍남옥 콩나물국밥", "region": "전주", "area": "객사",
+      "food_type": "한식", "rating": 4.4, "review_count": 2950, "price_level": 1,
+      "lat": 35.8171, "lng": 127.1477, "good_for": ["친구", "혼밥", "해장"],
+      "signature_menu": "콩나물국밥", "open_dinner": true,
+      "description": "24시간 콩나물국밥 맛집. 가성비 최고."
+    },
+    {
+      "id": "jj003", "name": "객리단길 파스타하우스", "region": "전주", "area": "객사",
+      "food_type": "양식", "rating": 4.5, "review_count": 980, "price_level": 3,
+      "lat": 35.8182, "lng": 127.1488, "good_for": ["친구", "데이트"],
+      "signature_menu": "트러플 크림 파스타", "open_dinner": true,
+      "description": "객리단길 분위기 좋은 파스타집. 저녁 데이트 인기."
+    },
+    {
+      "id": "jj004", "name": "전주막걸리골목 우정주막", "region": "전주", "area": "객사",
+      "food_type": "주점", "rating": 4.3, "review_count": 1530, "price_level": 2,
+      "lat": 35.8169, "lng": 127.1472, "good_for": ["친구", "회식"],
+      "signature_menu": "막걸리 한상", "open_dinner": true,
+      "description": "친구랑 막걸리 한잔 하기 좋은 전통 주막."
+    },
+    {
+      "id": "jj005", "name": "객사 스시오마카세", "region": "전주", "area": "객사",
+      "food_type": "일식", "rating": 4.7, "review_count": 420, "price_level": 4,
+      "lat": 35.8185, "lng": 127.1491, "good_for": ["데이트", "기념일"],
+      "signature_menu": "디너 오마카세", "open_dinner": true,
+      "description": "전주 객사 고급 오마카세. 가격대 높음."
+    },
+    {
+      "id": "jj006", "name": "객사앞 등심돈까스", "region": "전주", "area": "객사",
+      "food_type": "일식", "rating": 4.2, "review_count": 760, "price_level": 2,
+      "lat": 35.8176, "lng": 127.1481, "good_for": ["친구", "가족", "혼밥"],
+      "signature_menu": "등심 돈까스", "open_dinner": true,
+      "description": "두툼한 등심 돈까스. 가성비 좋은 일식 분식."
+    },
+    {
+      "id": "jj007", "name": "한옥마을 전주비빔", "region": "전주", "area": "한옥마을",
+      "food_type": "한식", "rating": 4.1, "review_count": 3300, "price_level": 2,
+      "lat": 35.8152, "lng": 127.1528, "good_for": ["친구", "가족", "관광"],
+      "signature_menu": "비빔밥 정식", "open_dinner": false,
+      "description": "한옥마을 관광객 맛집. 저녁 영업 안 함."
+    },
+    {
+      "id": "jj008", "name": "객사 카페 보름", "region": "전주", "area": "객사",
+      "food_type": "카페", "rating": 4.6, "review_count": 1110, "price_level": 2,
+      "lat": 35.8180, "lng": 127.1486, "good_for": ["친구", "데이트"],
+      "signature_menu": "흑임자 라떼", "open_dinner": true,
+      "description": "객리단길 감성 카페. 디저트도 인기."
+    },
+    {
+      "id": "jj009", "name": "전주 수제버거 객사점", "region": "전주", "area": "객사",
+      "food_type": "양식", "rating": 4.0, "review_count": 540, "price_level": 2,
+      "lat": 35.8173, "lng": 127.1479, "good_for": ["친구", "혼밥"],
+      "signature_menu": "더블 치즈버거", "open_dinner": true,
+      "description": "객사 수제버거집. 친구랑 가볍게."
+    },
+    {
+      "id": "jj010", "name": "객사 마라탕마라샹궈", "region": "전주", "area": "객사",
+      "food_type": "중식", "rating": 4.3, "review_count": 870, "price_level": 2,
+      "lat": 35.8167, "lng": 127.1484, "good_for": ["친구"],
+      "signature_menu": "마라샹궈", "open_dinner": true,
+      "description": "젊은 층 인기 마라탕집."
+    },
+    {
+      "id": "jj011", "name": "객리단 디저트살롱", "region": "전주", "area": "객사",
+      "food_type": "디저트", "rating": 4.8, "review_count": 360, "price_level": 3,
+      "lat": 35.8184, "lng": 127.1489, "good_for": ["데이트", "친구"],
+      "signature_menu": "제철 과일 타르트", "open_dinner": true,
+      "description": "예약제 디저트 코스. 분위기 좋음."
+    },
+    {
+      "id": "jj012", "name": "전북대 곱창천국", "region": "전주", "area": "전북대",
+      "food_type": "한식", "rating": 4.4, "review_count": 2010, "price_level": 2,
+      "lat": 35.8462, "lng": 127.1302, "good_for": ["친구", "회식"],
+      "signature_menu": "모둠 곱창", "open_dinner": true,
+      "description": "전북대 앞 곱창 맛집."
+    },
+    {
+      "id": "jj013", "name": "객사 한정식 다담", "region": "전주", "area": "객사",
+      "food_type": "한식", "rating": 4.7, "review_count": 690, "price_level": 4,
+      "lat": 35.8170, "lng": 127.1490, "good_for": ["가족", "기념일", "접대"],
+      "signature_menu": "전주 한정식 코스", "open_dinner": true,
+      "description": "전주 전통 한정식. 가격대 높은 편."
+    },
+    {
+      "id": "jj014", "name": "객사 라멘야", "region": "전주", "area": "객사",
+      "food_type": "일식", "rating": 4.5, "review_count": 1240, "price_level": 2,
+      "lat": 35.8179, "lng": 127.1475, "good_for": ["친구", "혼밥"],
+      "signature_menu": "돈코츠 라멘", "open_dinner": true,
+      "description": "진한 돈코츠 라멘. 줄서는 집."
+    },
+    {
+      "id": "jj015", "name": "객사 화로구이 다정", "region": "전주", "area": "객사",
+      "food_type": "한식", "rating": 4.6, "review_count": 1670, "price_level": 3,
+      "lat": 35.8166, "lng": 127.1478, "good_for": ["친구", "회식", "가족"],
+      "signature_menu": "한우 모둠구이", "open_dinner": true,
+      "description": "친구랑 고기 구워먹기 좋은 화로구이. 저녁 인기."
+    },
+    {
+      "id": "sl001", "name": "홍대 봉골레파스타", "region": "서울", "area": "홍대",
+      "food_type": "양식", "rating": 4.4, "review_count": 2300, "price_level": 2,
+      "lat": 37.5560, "lng": 126.9240, "good_for": ["친구", "데이트"],
+      "signature_menu": "봉골레 파스타", "open_dinner": true,
+      "description": "홍대 파스타 맛집."
+    },
+    {
+      "id": "sl002", "name": "홍대 크림파스타랩", "region": "서울", "area": "홍대",
+      "food_type": "양식", "rating": 4.6, "review_count": 1450, "price_level": 3,
+      "lat": 37.5566, "lng": 126.9230, "good_for": ["데이트", "친구"],
+      "signature_menu": "트러플 크림 파스타", "open_dinner": true,
+      "description": "분위기 좋은 홍대 양식당."
+    },
+    {
+      "id": "sl003", "name": "홍대 스시준", "region": "서울", "area": "홍대",
+      "food_type": "일식", "rating": 4.5, "review_count": 980, "price_level": 3,
+      "lat": 37.5558, "lng": 126.9245, "good_for": ["데이트", "친구"],
+      "signature_menu": "초밥 세트", "open_dinner": true,
+      "description": "홍대 초밥집."
+    }
+  ]
+}
